@@ -41,7 +41,7 @@ stop: ## すべてのサーバーを停止
 	@-pkill -f "npm run dev" 2>/dev/null || true
 	@echo "$(GREEN)✓ すべてのサーバーを停止しました$(NC)"
 
-restart: stop start ## すべてのサーバーを再起動
+restart: stop db-generate start ## すべてのサーバーを再起動（Prismaクライアント再生成含む）
 
 status: ## サーバーの起動状況を確認
 	@echo "$(BLUE)サーバー起動状況:$(NC)"

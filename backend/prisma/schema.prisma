@@ -200,6 +200,9 @@ model Booking {
   guestEmail    String        @map("guest_email") @db.VarChar(255) // 予約者メール
   guestPhone    String        @map("guest_phone") @db.VarChar(20) // 予約者電話番号
   specialRequests String?     @map("special_requests") @db.Text // 特別なリクエスト
+  paymentMethod PaymentMethod @default(ONSITE) @map("payment_method") // 支払い方法
+  paymentStatus PaymentStatus @default(PENDING) @map("payment_status") // 支払いステータス
+  cardLast4     String?       @map("card_last4") @db.VarChar(4) // カード番号下4桁（クレカ払いの場合）
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
 
@@ -210,6 +213,7 @@ model Booking {
   @@index([guestId])
   @@index([roomId])
   @@index([status])
+  @@index([paymentStatus])
   @@index([checkInDate, checkOutDate])
   @@map("bookings")
 }
@@ -296,4 +300,17 @@ enum InvitationStatus {
   PENDING  // 招待待ち
   ACCEPTED // 承認済み
   EXPIRED  // 期限切れ
+}
+
+/// 支払い方法
+enum PaymentMethod {
+  ONSITE      // 現地払い
+  CREDIT_CARD // クレジットカード
+}
+
+/// 支払いステータス
+enum PaymentStatus {
+  PENDING   // 未払い
+  COMPLETED // 支払い済み
+  FAILED    // 失敗
 }

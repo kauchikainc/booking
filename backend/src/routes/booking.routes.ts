@@ -37,6 +37,13 @@ const createBookingValidation = [
   body('specialRequests')
     .optional()
     .trim(),
+  body('paymentMethod')
+    .isIn(['ONSITE', 'CREDIT_CARD'])
+    .withMessage('支払い方法はONSITEまたはCREDIT_CARDである必要があります'),
+  body('cardLast4')
+    .optional()
+    .matches(/^\d{4}$/)
+    .withMessage('カード番号下4桁は4桁の数字である必要があります'),
 ];
 
 /**

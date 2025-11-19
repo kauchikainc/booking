@@ -1,6 +1,6 @@
 import prisma from '../utils/prisma';
 import { AppError } from '../middleware/error-handler';
-import { BookingStatus } from '@prisma/client';
+import { BookingStatus, PaymentMethod, PaymentStatus } from '@prisma/client';
 
 /**
  * 予約作成データ
@@ -14,6 +14,8 @@ export interface CreateBookingData {
   guestEmail: string;
   guestPhone: string;
   specialRequests?: string;
+  paymentMethod: PaymentMethod; // 支払い方法（ONSITE: 現地払い、CREDIT_CARD: クレジットカード）
+  cardLast4?: string; // カード番号下4桁（クレカ払いの場合）
 }
 
 /**
@@ -105,6 +107,10 @@ export async function createBooking(userId: string, data: CreateBookingData) {
     throw new AppError(400, '指定された日程は満室です');
   }
 
+  // 支払いステータスを決定
+  // ONSITE（現地払い）の場合はPENDING、CREDIT_CARD（クレカ払い）の場合はCOMPLETED
+  const paymentStatus: PaymentStatus = data.paymentMethod === 'ONSITE' ? 'PENDING' : 'COMPLETED';
+
   // 予約を作成
   const booking = await prisma.booking.create({
     data: {
@@ -118,6 +124,9 @@ export async function createBooking(userId: string, data: CreateBookingData) {
       guestEmail: data.guestEmail,
       guestPhone: data.guestPhone,
       specialRequests: data.specialRequests,
+      paymentMethod: data.paymentMethod,
+      paymentStatus,
+      cardLast4: data.cardLast4,
       status: 'CONFIRMED',
     },
     include: {
