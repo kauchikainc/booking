@@ -14,28 +14,7 @@ export default function InvitationsPage() {
   // フォーム状態
   const [email, setEmail] = useState('');
   const [expiresInDays, setExpiresInDays] = useState(7);
-  const [requirePasswordChange, setRequirePasswordChange] = useState(false);
-  const [passwordMode, setPasswordMode] = useState<'auto' | 'manual'>('auto');
-  const [initialPassword, setInitialPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // パスワード自動生成
-  const generatePassword = () => {
-    const length = 12;
-    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-    let password = '';
-    for (let i = 0; i < length; i++) {
-      password += charset.charAt(Math.floor(Math.random() * charset.length));
-    }
-    return password;
-  };
-
-  // パスワードモードが変更されたときの処理
-  useEffect(() => {
-    if (passwordMode === 'auto') {
-      setInitialPassword(generatePassword());
-    }
-  }, [passwordMode]);
 
   // フィルター状態
   const [statusFilter, setStatusFilter] = useState<InvitationStatus | 'ALL'>('ALL');
@@ -68,11 +47,6 @@ export default function InvitationsPage() {
       return;
     }
 
-    if (!initialPassword.trim()) {
-      setError('パスワードを入力してください');
-      return;
-    }
-
     try {
       setIsSubmitting(true);
       setError(null);
@@ -82,20 +56,13 @@ export default function InvitationsPage() {
         email: email.trim(),
         role: 'OWNER', // 施設オーナー専用
         expiresInDays,
-        initialPassword: initialPassword.trim(),
-        requirePasswordChange,
       };
 
       await apiClient.createInvitation(data);
 
-      setSuccessMessage(
-        `${email} に招待を送信しました。初期パスワード: ${initialPassword}`
-      );
+      setSuccessMessage(`${email} に招待を送信しました`);
       setEmail('');
       setExpiresInDays(7);
-      setRequirePasswordChange(false);
-      setPasswordMode('auto');
-      setInitialPassword(generatePassword());
 
       // 招待一覧を再取得
       await fetchInvitations();
@@ -251,90 +218,6 @@ export default function InvitationsPage() {
                 max="30"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-            </div>
-
-            {/* パスワード変更強制チェックボックス */}
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="requirePasswordChange"
-                checked={requirePasswordChange}
-                onChange={(e) => setRequirePasswordChange(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="requirePasswordChange" className="ml-2 block text-sm text-gray-700">
-                初回ログイン時にパスワード変更を強制する
-              </label>
-            </div>
-
-            {/* パスワード設定モード */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                初期パスワード設定
-              </label>
-              <div className="space-y-2">
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="passwordAuto"
-                    name="passwordMode"
-                    value="auto"
-                    checked={passwordMode === 'auto'}
-                    onChange={(e) => setPasswordMode(e.target.value as 'auto' | 'manual')}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                  />
-                  <label htmlFor="passwordAuto" className="ml-2 block text-sm text-gray-700">
-                    自動生成
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="passwordManual"
-                    name="passwordMode"
-                    value="manual"
-                    checked={passwordMode === 'manual'}
-                    onChange={(e) => setPasswordMode(e.target.value as 'auto' | 'manual')}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                  />
-                  <label htmlFor="passwordManual" className="ml-2 block text-sm text-gray-700">
-                    任意入力
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            {/* パスワード入力欄 */}
-            <div>
-              <label htmlFor="initialPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                初期パスワード
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  id="initialPassword"
-                  value={initialPassword}
-                  onChange={(e) => setInitialPassword(e.target.value)}
-                  disabled={passwordMode === 'auto'}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder={passwordMode === 'auto' ? '自動生成されます' : 'パスワードを入力'}
-                  required
-                />
-                {passwordMode === 'auto' && (
-                  <button
-                    type="button"
-                    onClick={() => setInitialPassword(generatePassword())}
-                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
-                  >
-                    再生成
-                  </button>
-                )}
-              </div>
-              {passwordMode === 'auto' && initialPassword && (
-                <p className="mt-2 text-sm text-gray-600">
-                  生成されたパスワード: <span className="font-mono font-bold">{initialPassword}</span>
-                </p>
-              )}
             </div>
 
             <button

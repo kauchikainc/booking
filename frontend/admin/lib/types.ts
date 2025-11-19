@@ -65,7 +65,6 @@ export interface AuthResponse {
     id: string;
     email: string;
     role: string;
-    requirePasswordChange?: boolean;
   };
   token: string;
   expiresIn: string;
@@ -121,8 +120,6 @@ export interface CreateInvitationRequest {
   email: string;
   role: 'OWNER' | 'ADMIN';
   expiresInDays?: number;
-  initialPassword?: string;
-  requirePasswordChange?: boolean;
 }
 
 /**
