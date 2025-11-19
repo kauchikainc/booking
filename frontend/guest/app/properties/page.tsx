@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
 import { Property, PropertyType } from '@/lib/types';
@@ -17,7 +16,6 @@ const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
 };
 
 export default function PropertiesPage() {
-  const router = useRouter();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,15 +34,11 @@ export default function PropertiesPage() {
   // 検索フィルター表示状態
   const [showFilters, setShowFilters] = useState(false);
 
-  useEffect(() => {
-    loadProperties();
-  }, [filter, sortBy, sortOrder]);
-
   const loadProperties = async () => {
     try {
       setLoading(true);
       setError(null);
-      const params: any = {};
+      const params: Record<string, string | number> = {};
 
       if (filter !== 'ALL') params.type = filter;
       if (keyword) params.keyword = keyword;
@@ -65,6 +59,11 @@ export default function PropertiesPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadProperties();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, sortBy, sortOrder]);
 
   // 検索実行
   const handleSearch = () => {

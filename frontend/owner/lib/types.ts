@@ -133,7 +133,10 @@ export interface Property {
   description: string;
   type: PropertyType;
   address: string;
+  city: string | null;
+  state: string | null;
   postalCode: string | null;
+  country: string | null;
   latitude: number | null;
   longitude: number | null;
   checkInTime: string;
@@ -223,7 +226,10 @@ export interface UpdatePropertyRequest {
   description?: string;
   type?: PropertyType;
   address?: string;
+  city?: string;
+  state?: string;
   postalCode?: string;
+  country?: string;
   latitude?: number;
   longitude?: number;
   checkInTime?: string;
@@ -293,7 +299,9 @@ export interface Booking {
   createdAt: string;
   updatedAt: string;
   room?: {
+    id: string;
     name: string;
+    propertyId: string;
     property: {
       id: string;
       name: string;

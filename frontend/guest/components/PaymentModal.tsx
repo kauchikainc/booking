@@ -152,8 +152,9 @@ export default function PaymentModal({ totalPrice, onClose, onConfirm }: Payment
       // 決済成功（Stripe連携は将来実装）
       const cardLast4 = creditCardInfo.cardNumber.slice(-4);
       onConfirm('CREDIT_CARD', cardLast4);
-    } catch (error: any) {
-      setPaymentError(error.message || '決済処理に失敗しました');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : '決済処理に失敗しました';
+      setPaymentError(message);
       setSubmitting(false);
     }
   };

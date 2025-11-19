@@ -48,12 +48,13 @@ export default function EditRoomPage() {
         });
         // この部屋に関連する予約のみフィルタリング
         const roomBookings = allBookings.filter(
-          (booking) => booking.room.id === roomId
+          (booking) => booking.room?.id === roomId
         );
         setBookings(roomBookings);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('部屋情報の取得に失敗:', err);
-        setError(err.message || '部屋情報の取得に失敗しました');
+        const message = err instanceof Error ? err.message : '部屋情報の取得に失敗しました';
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -85,8 +86,9 @@ export default function EditRoomPage() {
       } else {
         router.push('/properties');
       }
-    } catch (err: any) {
-      setError(err.message || '部屋の更新に失敗しました');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : '部屋の更新に失敗しました';
+      setError(message);
       setSubmitting(false);
     }
   };

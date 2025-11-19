@@ -36,6 +36,7 @@ export default function InvitationsPage() {
 
   useEffect(() => {
     fetchInvitations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter]);
 
   // 招待を作成

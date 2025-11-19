@@ -32,7 +32,7 @@ function StatusBadge({ status }: { status: PropertyStatus }) {
 
 export default function PropertiesPage() {
   const router = useRouter();
-  const { user, fetchUser, loading: authLoading } = useAuthStore();
+  const { user, fetchUser, isLoading: authLoading } = useAuthStore();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +53,7 @@ export default function PropertiesPage() {
     if (user) {
       loadProperties();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, filter]);
 
   const loadProperties = async () => {

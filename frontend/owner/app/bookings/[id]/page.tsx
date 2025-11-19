@@ -21,9 +21,10 @@ export default function BookingDetailPage() {
         setLoading(true);
         const data = await apiClient.getBooking(bookingId);
         setBooking(data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('予約詳細の取得に失敗:', err);
-        setError(err.message || '予約詳細の取得に失敗しました');
+        const message = err instanceof Error ? err.message : '予約詳細の取得に失敗しました';
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -41,8 +42,9 @@ export default function BookingDetailPage() {
     try {
       const updatedBooking = await apiClient.updateBookingStatus(bookingId, newStatus);
       setBooking(updatedBooking);
-    } catch (err: any) {
-      alert(err.message || 'ステータスの更新に失敗しました');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'ステータスの更新に失敗しました';
+      alert(message);
     } finally {
       setUpdatingStatus(false);
     }

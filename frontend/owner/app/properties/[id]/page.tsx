@@ -33,12 +33,13 @@ export default function PropertyDetailPage() {
         setRooms(roomsData);
         // この物件に関連する予約のみフィルタリング
         const propertyBookings = allBookings.filter(
-          (booking) => booking.room.propertyId === propertyId
+          (booking) => booking.room?.propertyId === propertyId
         );
         setBookings(propertyBookings);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('データの取得に失敗:', err);
-        setError(err.message || 'データの取得に失敗しました');
+        const message = err instanceof Error ? err.message : 'データの取得に失敗しました';
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -56,8 +57,9 @@ export default function PropertyDetailPage() {
     try {
       await apiClient.deleteRoom(roomId);
       setRooms(rooms.filter((room) => room.id !== roomId));
-    } catch (err: any) {
-      alert(err.message || '部屋の削除に失敗しました');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : '部屋の削除に失敗しました';
+      alert(message);
     }
   };
 
@@ -80,8 +82,9 @@ export default function PropertyDetailPage() {
       });
       setProperty(updatedProperty);
       alert('ステータスを更新しました');
-    } catch (err: any) {
-      alert(err.message || 'ステータスの更新に失敗しました');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'ステータスの更新に失敗しました';
+      alert(message);
     } finally {
       setUpdatingStatus(false);
     }
@@ -466,8 +469,9 @@ function CreateRoomModal({
         quantity: parseInt(formData.quantity),
       });
       onRoomCreated(newRoom);
-    } catch (err: any) {
-      setError(err.message || '部屋の作成に失敗しました');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : '部屋の作成に失敗しました';
+      setError(message);
     } finally {
       setSubmitting(false);
     }

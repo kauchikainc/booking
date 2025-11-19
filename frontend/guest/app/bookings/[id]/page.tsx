@@ -22,9 +22,10 @@ export default function BookingDetailPage() {
         setLoading(true);
         const data = await apiClient.getBooking(bookingId);
         setBooking(data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('予約詳細の取得に失敗:', err);
-        setError(err.message || '予約詳細の取得に失敗しました');
+        const message = err instanceof Error ? err.message : '予約詳細の取得に失敗しました';
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -42,8 +43,9 @@ export default function BookingDetailPage() {
     try {
       await apiClient.cancelBooking(bookingId);
       setBooking((prev) => (prev ? { ...prev, status: 'CANCELLED' } : null));
-    } catch (err: any) {
-      alert(err.message || '予約のキャンセルに失敗しました');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : '予約のキャンセルに失敗しました';
+      alert(message);
     } finally {
       setCancelling(false);
     }
@@ -52,10 +54,6 @@ export default function BookingDetailPage() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
-  };
-
-  const formatDateTime = (dateString: string, time: string) => {
-    return `${formatDate(dateString)} ${time}`;
   };
 
   const getStatusBadge = (status: string) => {

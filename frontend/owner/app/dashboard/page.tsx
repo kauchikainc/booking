@@ -9,7 +9,7 @@ import { useAuthStore } from '@/lib/store/auth';
  */
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, isLoading, fetchUser, logout } = useAuthStore();
+  const { user, isLoading, fetchUser } = useAuthStore();
 
   useEffect(() => {
     fetchUser();
@@ -21,11 +21,6 @@ export default function DashboardPage() {
       router.push('/profile/password?required=true');
     }
   }, [user, router]);
-
-  const handleLogout = async () => {
-    await logout();
-    router.push('/login');
-  };
 
   if (isLoading) {
     return (

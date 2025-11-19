@@ -25,9 +25,10 @@ export default function BookingsPage() {
         ]);
         setBookings(bookingsData);
         setProperties(propertiesData.properties);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('データの取得に失敗:', err);
-        setError(err.message || 'データの取得に失敗しました');
+        const message = err instanceof Error ? err.message : 'データの取得に失敗しました';
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -49,8 +50,9 @@ export default function BookingsPage() {
           booking.id === bookingId ? updatedBooking : booking
         )
       );
-    } catch (err: any) {
-      alert(err.message || 'ステータスの更新に失敗しました');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'ステータスの更新に失敗しました';
+      alert(message);
     } finally {
       setUpdatingStatus(null);
     }

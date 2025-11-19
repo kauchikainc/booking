@@ -12,7 +12,6 @@ export default function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // フィルター状態
   const [statusFilter, setStatusFilter] = useState<BookingStatus | ''>('');
@@ -44,6 +43,7 @@ export default function BookingsPage() {
 
   useEffect(() => {
     fetchBookings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, statusFilter]);
 
   // ステータスバッジの色を取得
@@ -145,12 +145,6 @@ export default function BookingsPage() {
             </div>
           )}
 
-          {successMessage && (
-            <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-              {successMessage}
-            </div>
-          )}
-
           {/* フィルター */}
           <div className="bg-white shadow rounded-lg p-6 mb-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -162,7 +156,7 @@ export default function BookingsPage() {
                   id="statusFilter"
                   value={statusFilter}
                   onChange={(e) => {
-                    setStatusFilter(e.target.value as any);
+                    setStatusFilter(e.target.value as BookingStatus | '');
                     setCurrentPage(1);
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"

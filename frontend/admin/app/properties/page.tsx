@@ -48,6 +48,7 @@ export default function PropertiesPage() {
 
   useEffect(() => {
     fetchProperties();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, statusFilter]);
 
   // 施設を承認
@@ -206,7 +207,7 @@ export default function PropertiesPage() {
                   id="statusFilter"
                   value={statusFilter}
                   onChange={(e) => {
-                    setStatusFilter(e.target.value as any);
+                    setStatusFilter(e.target.value as PropertyStatus | '');
                     setCurrentPage(1);
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"

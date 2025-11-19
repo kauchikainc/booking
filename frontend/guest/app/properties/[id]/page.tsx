@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
-import { Property, PropertyType, Room, Booking, PaymentMethod } from '@/lib/types';
+import { Property, PropertyType, Room, PaymentMethod } from '@/lib/types';
 import Navbar from '@/components/Navbar';
 import PaymentModal from '@/components/PaymentModal';
 
@@ -326,13 +326,11 @@ function BookingModal({
   const [error, setError] = useState<string | null>(null);
   const [estimatedPrice, setEstimatedPrice] = useState<number | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [loadingUserInfo, setLoadingUserInfo] = useState(true);
 
   // ログイン済みユーザーの情報を取得して自動補完
   useEffect(() => {
     async function loadUserInfo() {
       try {
-        setLoadingUserInfo(true);
         const user = await apiClient.getMe();
 
         // ゲストプロフィール情報があれば自動補完
@@ -358,8 +356,6 @@ function BookingModal({
       } catch (err) {
         // エラーは無視（ログインしていない場合など）
         console.error('ユーザー情報の取得に失敗:', err);
-      } finally {
-        setLoadingUserInfo(false);
       }
     }
 
@@ -420,8 +416,9 @@ function BookingModal({
         cardLast4,
       });
       onBookingCreated(booking.id);
-    } catch (err: any) {
-      setError(err.message || '予約の作成に失敗しました');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : '予約の作成に失敗しました';
+      setError(message);
       setShowPaymentModal(false);
     } finally {
       setSubmitting(false);

@@ -240,9 +240,16 @@ export interface Booking {
   updatedAt: string;
   room?: {
     name: string;
+    description: string | null;
+    size: number | null;
+    capacity: number;
+    bedType: string | null;
+    pricePerNight: number;
+    propertyId: string;
     property: {
       name: string;
       address: string;
+      description: string | null;
       checkInTime: string;
       checkOutTime: string;
     };

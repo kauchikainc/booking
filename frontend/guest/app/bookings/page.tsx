@@ -18,9 +18,10 @@ export default function BookingsPage() {
         setLoading(true);
         const data = await apiClient.getMyBookings();
         setBookings(data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('予約一覧の取得に失敗:', err);
-        setError(err.message || '予約一覧の取得に失敗しました');
+        const message = err instanceof Error ? err.message : '予約一覧の取得に失敗しました';
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -42,8 +43,9 @@ export default function BookingsPage() {
           booking.id === bookingId ? { ...booking, status: 'CANCELLED' } : booking
         )
       );
-    } catch (err: any) {
-      alert(err.message || '予約のキャンセルに失敗しました');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : '予約のキャンセルに失敗しました';
+      alert(message);
     }
   };
 
