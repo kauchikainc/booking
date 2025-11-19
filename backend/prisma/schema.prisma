@@ -1,0 +1,299 @@
+// Prisma スキーマファイル
+// データベース設計: docs/database/schema-design.md を参照
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========================================
+// ユーザー関連テーブル
+// ========================================
+
+/// ユーザー（全ユーザー種別の共通情報）
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  role          Role     @default(GUEST)
+  status        Status   @default(ACTIVE)
+  emailVerified Boolean  @default(false) @map("email_verified")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // リレーション
+  guestProfile     GuestProfile?
+  ownerProfile     OwnerProfile?
+  sentInvitations  Invitation[]   @relation("InvitedBy")
+
+  @@index([email])
+  @@index([role, status])
+  @@map("users")
+}
+
+/// 一般利用者プロフィール
+model GuestProfile {
+  id              String    @id @default(uuid())
+  userId          String    @unique @map("user_id")
+  firstName       String?   @map("first_name") @db.VarChar(100)
+  lastName        String?   @map("last_name") @db.VarChar(100)
+  phone           String?   @db.VarChar(20)
+  dateOfBirth     DateTime? @map("date_of_birth") @db.Date
+  nationality     String?   @db.VarChar(2)
+  profileImageUrl String?   @map("profile_image_url")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // リレーション
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  @@index([userId])
+  @@map("guest_profiles")
+}
+
+/// 施設オーナープロフィール
+model OwnerProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique @map("user_id")
+  companyName     String?  @map("company_name") @db.VarChar(200)
+  representative  String?  @db.VarChar(100)
+  phone           String   @db.VarChar(20)
+  postalCode      String?  @map("postal_code") @db.VarChar(10)
+  address         String
+  businessLicense String?  @map("business_license") @db.VarChar(100)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // リレーション
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  properties Property[]
+
+  @@index([userId])
+  @@map("owner_profiles")
+}
+
+// ========================================
+// 物件関連テーブル
+// ========================================
+
+/// 物件（宿泊施設）
+model Property {
+  id          String         @id @default(uuid())
+  ownerId     String         @map("owner_id")
+  name        String         @db.VarChar(200)
+  description String         @db.Text
+  type        PropertyType
+  address     String
+  postalCode  String?        @map("postal_code") @db.VarChar(10)
+  latitude    Float?
+  longitude   Float?
+  checkInTime String         @map("check_in_time") @db.VarChar(5)
+  checkOutTime String        @map("check_out_time") @db.VarChar(5)
+  status      PropertyStatus @default(DRAFT)
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  // リレーション
+  owner      OwnerProfile    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  rooms      Room[]
+  images     PropertyImage[]
+  amenities  PropertyAmenity[]
+
+  @@index([ownerId])
+  @@index([status])
+  @@index([type])
+  @@map("properties")
+}
+
+/// 部屋
+model Room {
+  id          String     @id @default(uuid())
+  propertyId  String     @map("property_id")
+  name        String     @db.VarChar(100)
+  description String?    @db.Text
+  size        Float? // 平米数
+  capacity    Int // 最大宿泊人数
+  bedType     String?    @map("bed_type") @db.VarChar(100)
+  pricePerNight Int      @map("price_per_night") // 1泊あたりの料金（円）
+  quantity    Int        @default(1) // 同タイプの部屋数
+  status      RoomStatus @default(AVAILABLE)
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  // リレーション
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  images   RoomImage[]
+  bookings Booking[]
+
+  @@index([propertyId])
+  @@index([status])
+  @@map("rooms")
+}
+
+/// 物件画像
+model PropertyImage {
+  id         String   @id @default(uuid())
+  propertyId String   @map("property_id")
+  url        String
+  caption    String?  @db.VarChar(200)
+  order      Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // リレーション
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("property_images")
+}
+
+/// 部屋画像
+model RoomImage {
+  id        String   @id @default(uuid())
+  roomId    String   @map("room_id")
+  url       String
+  caption   String?  @db.VarChar(200)
+  order     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // リレーション
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId])
+  @@map("room_images")
+}
+
+/// 物件設備
+model PropertyAmenity {
+  id         String   @id @default(uuid())
+  propertyId String   @map("property_id")
+  name       String   @db.VarChar(100)
+  icon       String?  @db.VarChar(50)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // リレーション
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("property_amenities")
+}
+
+// ========================================
+// 予約関連テーブル
+// ========================================
+
+/// 予約
+model Booking {
+  id            String        @id @default(uuid())
+  guestId       String        @map("guest_id")
+  roomId        String        @map("room_id")
+  checkInDate   DateTime      @map("check_in_date") @db.Date
+  checkOutDate  DateTime      @map("check_out_date") @db.Date
+  numberOfGuests Int          @map("number_of_guests")
+  totalPrice    Int           @map("total_price") // 合計料金（円）
+  status        BookingStatus @default(PENDING)
+  guestName     String        @map("guest_name") @db.VarChar(200) // 予約者氏名
+  guestEmail    String        @map("guest_email") @db.VarChar(255) // 予約者メール
+  guestPhone    String        @map("guest_phone") @db.VarChar(20) // 予約者電話番号
+  specialRequests String?     @map("special_requests") @db.Text // 特別なリクエスト
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  // リレーション
+  guest GuestProfile @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  room  Room         @relation(fields: [roomId], references: [id], onDelete: Restrict)
+
+  @@index([guestId])
+  @@index([roomId])
+  @@index([status])
+  @@index([checkInDate, checkOutDate])
+  @@map("bookings")
+}
+
+// ========================================
+// 招待関連テーブル
+// ========================================
+
+/// 招待
+model Invitation {
+  id         String           @id @default(uuid())
+  email      String           @db.VarChar(255)
+  role       Role             // OWNER または ADMIN
+  token      String           @unique @db.VarChar(255)
+  invitedBy  String           @map("invited_by")
+  status     InvitationStatus @default(PENDING)
+  expiresAt  DateTime         @map("expires_at")
+  acceptedAt DateTime?        @map("accepted_at")
+  createdAt  DateTime         @default(now()) @map("created_at")
+  updatedAt  DateTime         @updatedAt @map("updated_at")
+
+  // リレーション
+  invitedByUser User @relation("InvitedBy", fields: [invitedBy], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([email])
+  @@index([status])
+  @@map("invitations")
+}
+
+// ========================================
+// Enum定義
+// ========================================
+
+/// ユーザーロール
+enum Role {
+  GUEST // 一般利用者
+  OWNER // 施設オーナー
+  ADMIN // 管理者
+}
+
+/// アカウント状態
+enum Status {
+  ACTIVE    // 有効
+  INACTIVE  // 無効
+  SUSPENDED // 停止中
+}
+
+/// 物件タイプ
+enum PropertyType {
+  HOTEL      // ホテル
+  HOSTEL     // ホステル
+  GUESTHOUSE // ゲストハウス
+  APARTMENT  // アパートメント
+  RESORT     // リゾート
+}
+
+/// 物件ステータス
+enum PropertyStatus {
+  DRAFT     // 下書き
+  PUBLISHED // 公開中
+  SUSPENDED // 一時停止
+  CLOSED    // 閉鎖
+}
+
+/// 部屋ステータス
+enum RoomStatus {
+  AVAILABLE   // 予約可能
+  UNAVAILABLE // 予約不可
+  MAINTENANCE // メンテナンス中
+}
+
+/// 予約ステータス
+enum BookingStatus {
+  PENDING    // 予約待ち
+  CONFIRMED  // 予約確定
+  CHECKED_IN // チェックイン済み
+  CHECKED_OUT // チェックアウト済み
+  CANCELLED  // キャンセル
+}
+
+/// 招待ステータス
+enum InvitationStatus {
+  PENDING  // 招待待ち
+  ACCEPTED // 承認済み
+  EXPIRED  // 期限切れ
+}

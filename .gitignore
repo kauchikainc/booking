@@ -1,0 +1,57 @@
+# 一時ファイル
+temp_*.md
+
+/.claude/
+
+# 環境変数
+.env
+.env.local
+.env.*.local
+
+# 依存関係
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ビルド成果物
+dist/
+build/
+.next/
+out/
+
+# ログ
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# テスト
+coverage/
+.nyc_output/
+
+# Prisma
+prisma/migrations/**/migration.sql
+
+# デバッグ
+.cache/
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
