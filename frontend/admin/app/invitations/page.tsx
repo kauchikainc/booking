@@ -91,7 +91,9 @@ export default function InvitationsPage() {
 
   // トークンをコピー
   const handleCopyToken = (token: string) => {
-    const invitationUrl = `${window.location.origin}/register?token=${token}`;
+    // Owner フロントエンドのURLを環境変数から取得
+    const ownerFrontendUrl = process.env.NEXT_PUBLIC_OWNER_FRONTEND_URL || 'http://localhost:3102';
+    const invitationUrl = `${ownerFrontendUrl}/register?token=${token}`;
     navigator.clipboard.writeText(invitationUrl);
     setSuccessMessage('招待URLをコピーしました');
   };
